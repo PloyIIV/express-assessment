@@ -8,11 +8,17 @@ const app = express();
 app.use(express.json());
 app.use(cors({ origin: "http://localhost:5173" }));
 
-app.use('/products', productRouter)
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()} ] ${req.method} ${req.url}`);
+  next();
+});
+
 
 app.get("/", (req, res) => {
   return res.send("Hello.");
 });
+
+app.use('/products', productRouter)
 
 app.use((err, req, res, next) => {
   return res.status(500).json({

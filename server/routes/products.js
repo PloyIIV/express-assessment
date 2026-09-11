@@ -5,22 +5,9 @@ export const router = Router();
 
 router.get("/", async (req, res, next) => {
   try {
-    const { sort, filter } = req.query;
-    if (sort && filter) {
-      const data = await Product.find({
-        name: { $regex: `(?i)${filter}` },
-      }).sort({ price: sort === "low" ? 1 : -1 });
-      return res.status(200).json({
-        success: true,
-        data,
-      });
-    } else if (sort) {
-      const data = await Product.find().sort({ price: sort === "low" ? 1 : -1 });
-      return res.status(200).json({
-        success: true,
-        data,
-      });
-    } else if (filter) {
+    const { filter } = req.query;
+    if (filter) {
+      console.log(filter)
       const data = await Product.find({ name: { $regex: `(?i)${filter}` } });
       return res.status(200).json({
         success: true,
@@ -59,9 +46,11 @@ router.get("/:id", async (req, res, next) => {
 
 router.post("/", async (req, res, next) => {
   try {
+    console.log(req.body)
     const { name, price, quantity } = req.body;
     if (!name || !price || !quantity) {
-      return res.status(400).json({
+      return res.json({
+        success: false,
         message: "Please provide required data.",
       });
     }
@@ -69,6 +58,7 @@ router.post("/", async (req, res, next) => {
     console.log(data);
     return res.status(200).json({
       message: "Created Product successfully.",
+      data
     });
   } catch (error) {
     next(error);
@@ -77,8 +67,15 @@ router.post("/", async (req, res, next) => {
 
 router.put("/:id", async (req, res, next) => {
   try {
+    console.log(req.body, req.params)
     const { id } = req.params;
     const { name, price, quantity } = req.body;
+    if(name.trim() === '') {
+      return res.json({
+        success: false,
+        message: "Missing somg data."
+      })
+    }
     const data = await Product.findByIdAndUpdate(id, { name, price, quantity });
     if (!data) {
       return res.status(400).json({
