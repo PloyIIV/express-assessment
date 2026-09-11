@@ -16,6 +16,26 @@ router.get("/", async (req, res, next) => {
   }
 });
 
+router.get("/:id", async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    const data = await Product.findById(id);
+    if (!data) {
+      return res.status(404).json({
+        success: false,
+        message: "Cannot found this product.",
+      });
+    }
+    console.log(data);
+    return res.json({
+      success: true,
+      data,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.post("/", async (req, res, next) => {
   try {
     const { name, price, quantity } = req.body;
@@ -33,3 +53,44 @@ router.post("/", async (req, res, next) => {
     next(error);
   }
 });
+
+router.put("/:id", async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { name, price, quantity } = req.body;
+    const data = await Product.findByIdAndUpdate(id, { name, price, quantity });
+    if(!data) {
+        return res.status(400).json({
+            message: "Cannot find this product."
+        })
+    }
+    console.log(data);
+    return res.status(200).json({
+      success: true,
+      message: "Updated product successfully.",
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.delete('/:id', async (req, res, next) => {
+    try {
+        const { id } = req.params
+        
+        const response = await Product.findByIdAndDelete(id)
+        console.log(response)
+        if(!response) {
+            return res.status(400).json({
+                success: false,
+                message: "Cannot find this prodcut."
+            })
+        }
+        return res.status(200).json({
+            success: true,
+            message: "Deleted this prodcut successfully."
+        })
+    } catch (error) {
+        next(error)
+    }
+})
