@@ -5,8 +5,29 @@ export const router = Router();
 
 router.get("/", async (req, res, next) => {
   try {
+    const { sort, filter } = req.query;
+    if (sort && filter) {
+      const data = await Product.find({
+        name: { $regex: `(?i)${filter}` },
+      }).sort({ price: sort === "low" ? 1 : -1 });
+      return res.status(200).json({
+        success: true,
+        data,
+      });
+    } else if (sort) {
+      const data = await Product.find().sort({ price: sort === "low" ? 1 : -1 });
+      return res.status(200).json({
+        success: true,
+        data,
+      });
+    } else if (filter) {
+      const data = await Product.find({ name: { $regex: `(?i)${filter}` } });
+      return res.status(200).json({
+        success: true,
+        data,
+      });
+    }
     const data = await Product.find();
-    console.log(data);
     return res.status(200).json({
       success: true,
       data,
@@ -59,10 +80,10 @@ router.put("/:id", async (req, res, next) => {
     const { id } = req.params;
     const { name, price, quantity } = req.body;
     const data = await Product.findByIdAndUpdate(id, { name, price, quantity });
-    if(!data) {
-        return res.status(400).json({
-            message: "Cannot find this product."
-        })
+    if (!data) {
+      return res.status(400).json({
+        message: "Cannot find this product.",
+      });
     }
     console.log(data);
     return res.status(200).json({
@@ -74,23 +95,23 @@ router.put("/:id", async (req, res, next) => {
   }
 });
 
-router.delete('/:id', async (req, res, next) => {
-    try {
-        const { id } = req.params
-        
-        const response = await Product.findByIdAndDelete(id)
-        console.log(response)
-        if(!response) {
-            return res.status(400).json({
-                success: false,
-                message: "Cannot find this prodcut."
-            })
-        }
-        return res.status(200).json({
-            success: true,
-            message: "Deleted this prodcut successfully."
-        })
-    } catch (error) {
-        next(error)
+router.delete("/:id", async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const response = await Product.findByIdAndDelete(id);
+    console.log(response);
+    if (!response) {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot find this prodcut.",
+      });
     }
-})
+    return res.status(200).json({
+      success: true,
+      message: "Deleted this prodcut successfully.",
+    });
+  } catch (error) {
+    next(error);
+  }
+});
